@@ -1,26 +1,45 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <MainHeader />
+  <MainSidebar />
+  <div class="main-content d-flex flex-column transition overflow-hidden">
+    <router-view />
+    <MainFooter />
+  </div>
 </template>
 
-<script>
-import HelloWorld from './components/HelloWorld.vue'
+<script lang="ts">
+import { defineComponent, watchEffect } from "vue";
+import stateStore from "./utils/store";
 
-export default {
-  name: 'App',
+import MainHeader from "./components/Layouts/MainHeader.vue";
+import MainSidebar from "./components/Layouts/MainSidebar.vue";
+import MainFooter from "./components/Layouts/MainFooter.vue";
+
+export default defineComponent({
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
-</script>
+    MainHeader,
+    MainSidebar,
+    MainFooter,
+  },
+  mounted() {
+    document.body.classList.add("bg-body-secondary");
+  },
+  setup() {
+    const stateStoreInstance = stateStore;
+    watchEffect(() => {
+      if (stateStoreInstance.open) {
+        document.body.classList.remove("sidebar-show");
+        document.body.classList.add("sidebar-hide");
+        console.log("show");
+      } else {
+        document.body.classList.remove("sidebar-hide");
+        document.body.classList.add("sidebar-show");
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
+        console.log("hide");
+      }
+    });
+    return {};
+  },
+});
+</script>
