@@ -7,7 +7,6 @@ import { QuillEditor } from "@vueup/vue-quill";
 import Vue3Prism from "vue3-prism/lib/Vue3Prism.common.js";
 import PrimeVue from "primevue/config";
 import Loading from "vue-loading-overlay";
-import moment from "moment-timezone";
 import VueToast from "vue-toastification";
 import ConfirmationService from "primevue/confirmationservice";
 
@@ -36,4 +35,3 @@ app.use(VueToast);
 app.component("VueLoading", Loading);
 app.component("QuillEditor", QuillEditor).use(Vue3Prism);
 app.mount("#app");
-moment.tz.setDefault("America/Mexico_City");

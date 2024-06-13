@@ -27,11 +27,6 @@
             <div class="accordion-body">
               <ul class="sidebar-sub-menu ps-0 mb-0 list-unstyled">
                 <li class="sidebar-sub-menu-item">
-                  <router-link to="/charts" class="sidebar-sub-menu-link">
-                    Charts
-                  </router-link>
-                </li>
-                <li class="sidebar-sub-menu-item">
                   <router-link to="/mixed-charts" class="sidebar-sub-menu-link">
                     Mixed Charts
                   </router-link>
