@@ -15,6 +15,8 @@ import MainHeader from "./components/Layouts/MainHeader.vue";
 import MainSidebar from "./components/Layouts/MainSidebar.vue";
 import MainFooter from "./components/Layouts/MainFooter.vue";
 
+import DataInformation from "./controller/DataInformation";
+
 export default defineComponent({
   name: "App",
   components: {
@@ -39,7 +41,6 @@ export default defineComponent({
         console.log("hide");
       }
     });
-    return {};
   },
 });
 </script>
