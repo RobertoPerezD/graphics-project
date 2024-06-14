@@ -1,18 +1,12 @@
 import { createWebHistory, createRouter } from "vue-router";
 
 import ChartsPage from "../pages/Charts/ChartsPage.vue";
-import MixedChartsPage from "../pages/Charts/MixedChartsPage.vue";
 
 const routes = [
   {
     path: "/",
     name: "ChartsPage",
     component: ChartsPage,
-  },
-  {
-    path: "/mixed-charts",
-    name: "MixedChartsPage",
-    component: MixedChartsPage,
   },
 ];
 

@@ -1,24 +1,18 @@
 <template>
   <div class="card mb-25 border-0 rounded-0 bg-white">
     <div class="card-body p-15 p-sm-20 p-sm-25 p-lg-30 letter-spacing">
-      <div
-        class="mb-lg-15 d-sm-flex align-items-center justify-content-between"
-      >
+      <div class="mb-lg-15 d-sm-flex align-items-center justify-content-between">
         <h6 class="card-title fw-bold mb-0">
-            Cliente que ha realizado más compras
+          Cliente que ha realizado más compras
         </h6>
       </div>
       <div id="topClientsChart" class="chart">
-        <apexchart
-          type="bar"
-          :options="topClientsChartOptions"
-          :series="[
-            {
-              name: 'Cantidad de compras',
-              data: top5Clients.map((client) => client.totalPurchase),
-            },
-          ]"
-        ></apexchart>
+        <apexchart type="bar" :options="topClientsChartOptions" :series="[
+          {
+            name: 'Cantidad de compras',
+            data: top5Clients.map((client) => client.totalPurchase),
+          },
+        ]"></apexchart>
       </div>
     </div>
   </div>

@@ -52,8 +52,10 @@ export default class InformationJSON {
   }
 
   async convertInformationJSON() {
-    // const data = await this.getInformationRequest();
+    const data = await this.getInformationRequest();
 
     return await this.parseData(data);
+
+    // return await this.parseData(data);
   }
 }

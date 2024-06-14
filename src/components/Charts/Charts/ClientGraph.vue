@@ -1,24 +1,18 @@
 <template>
   <div class="card mb-25 border-0 rounded-0 bg-white">
     <div class="card-body p-15 p-sm-20 p-sm-25 p-lg-30 letter-spacing">
-      <div
-        class="mb-lg-15 d-sm-flex align-items-center justify-content-between"
-      >
+      <div class="mb-lg-15 d-sm-flex align-items-center justify-content-between">
         <h6 class="card-title fw-bold mb-0">
           Cantidad total gastada por el cliente que más ha gastado
         </h6>
       </div>
       <div id="topClientsChart" class="chart">
-        <apexchart
-          type="bar"
-          :options="topClientsChartOptions"
-          :series="[
-            {
-              name: 'Total gastado',
-              data: topClients.map((client) => client.totalSpent),
-            },
-          ]"
-        ></apexchart>
+        <apexchart type="bar" :options="topClientsChartOptions" :series="[
+          {
+            name: 'Total gastado',
+            data: topClients.map((client) => client.totalSpent),
+          },
+        ]"></apexchart>
       </div>
     </div>
   </div>
@@ -125,7 +119,6 @@ export default defineComponent({
           const payment = parseFloat(order.payment.replace(",", "."));
           const total = (clientTotalSpent[clientId] || 0) + payment;
 
-          // Redondear el total a dos decimales
           clientTotalSpent[clientId] = parseFloat(total.toFixed(2));
         });
 

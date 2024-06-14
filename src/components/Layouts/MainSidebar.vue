@@ -5,8 +5,7 @@
   ]" id="sidebar-area">
     <div class="logo position-absolute start-0 end-0 top-0 bg-black">
       <router-link to="/" class="d-flex align-items-center text-white text-decoration-none">
-        <img src="../../assets/images/favicon.png" alt="logo-icon" />
-        <span class="fw-bold ms-10">Adlash</span>
+        <span class="fw-bold ms-10">GRAFICAS</span>
       </router-link>
       <div class="border-bottom"></div>
       <button class="sidebar-burger-menu position-absolute lh-1 bg-transparent p-0 border-0"
@@ -21,19 +20,8 @@
             data-bs-toggle="collapse" data-bs-target="#sidebarCollapseFourteen" aria-expanded="false"
             aria-controls="sidebarCollapseFourteen">
             <i class="flaticon-pie-chart"></i>
-            <span class="title">Charts</span>
+            <span class="title">Graficas</span>
           </a>
-          <div id="sidebarCollapseFourteen" class="accordion-collapse collapse" data-bs-parent="#sidebarNavAccordion">
-            <div class="accordion-body">
-              <ul class="sidebar-sub-menu ps-0 mb-0 list-unstyled">
-                <li class="sidebar-sub-menu-item">
-                  <router-link to="/mixed-charts" class="sidebar-sub-menu-link">
-                    Mixed Charts
-                  </router-link>
-                </li>
-              </ul>
-            </div>
-          </div>
         </li>
       </ul>
     </div>

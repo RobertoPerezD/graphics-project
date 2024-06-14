@@ -2,7 +2,7 @@
   <div class="card mb-25 border-0 rounded-0 bg-white customer-satisfaction-box">
     <div class="card-body p-15 p-sm-20 p-sm-25 p-lg-30 letter-spacing">
       <div class="mb-15 mb-md-25 d-flex align-items-center justify-content-between">
-        <h6 class="card-title fw-bold mb-0">Métodos de pagos</h6>
+        <h6 class="card-title fw-bold mb-0">Ciudades con más compras</h6>
       </div>
       <div class="chart">
         <apexchart type="pie" height="430" id="customerSatisfactionChart" v-if="customer"
@@ -16,7 +16,7 @@
 import { defineComponent, ref, onMounted } from "vue";
 
 export default defineComponent({
-  name: "CustomerSatisfaction",
+  name: "CustomerCity",
   props: {
     arrayData: {
       type: Object,
@@ -33,19 +33,25 @@ export default defineComponent({
         const orders = Object.values(props.arrayData.orders);
 
         const mPay = orders.reduce((acc: Record<string, number>, item: any) => {
-          const type = item.payment_type;
-          if (type && item.payment_installments)
+          const type = item.customer_city;
+          if (type)
             acc[type] = (acc[type] || 0) + 1;
           return acc;
         }, {});
 
-        customer.value = Object.values(mPay)
+        const sortedCities = Object.entries(mPay)
+          .sort((a, b) => b[1] - a[1]) // Orden descendente por cantidad
+          .slice(0, 5);
+
+        const topCities = Object.fromEntries(sortedCities);
+
+        customer.value = Object.values(topCities)
         customerSatisfactionChart.value = {
           chart: {
             height: 430,
-            type: "pie",
+            type: "polarArea",
           },
-          labels: Object.keys(mPay),
+          labels: Object.keys(topCities),
           dataLabels: {
             enabled: true,
             formatter: function (val, opts) {
@@ -77,7 +83,6 @@ export default defineComponent({
             show: true,
             fontWeight: 500,
             fontSize: "14px",
-            position: "bottom",
             fontFamily: "Red Hat Display, sans-serif",
             labels: {
               colors: "#8E8DA1",

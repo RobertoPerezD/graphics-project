@@ -1,16 +1,11 @@
 <template>
   <div class="card mb-25 border-0 rounded-0 bg-white">
     <div class="card-body p-15 p-sm-20 p-sm-25 p-lg-30 letter-spacing">
-      <div class="mb-md-10 d-flex align-items-center justify-content-between">
-        <h6 class="card-title fw-bold mb-0">Productos más vendido</h6>
+      <div class="mb-lg-15 d-sm-flex align-items-center justify-content-between">
+        <h6 class="card-title fw-bold mb-0"> Peso promedio de los productos comprados</h6>
       </div>
-      <div id="topProductsChart" class="chart">
-        <apexchart type="bar" :options="topProductsChartOptions" :series="[
-          {
-            name: 'Cantidad de compras',
-            data: top10Products.map((product) => product.quantity),
-          },
-        ]"></apexchart>
+      <div id="websiteVisitorsChart" class="chart">
+        <apexchart type="bar" :options="websiteVisitorsChartOptions" :series="chartSeries"></apexchart>
       </div>
     </div>
   </div>
@@ -20,13 +15,8 @@
 import { defineComponent, onMounted, ref } from "vue";
 import VueApexCharts from "vue3-apexcharts";
 
-interface Product {
-  quantity: number;
-  productName: string;
-}
-
 export default defineComponent({
-  name: "BestSellingProductChart",
+  name: "WebsiteVisitors",
   props: {
     arrayData: {
       type: Object,
@@ -37,10 +27,16 @@ export default defineComponent({
   components: {
     apexchart: VueApexCharts,
   },
-  setup: (props) => {
-    const top10Products = ref<Product[]>([]);
+  setup(props) {
+    interface ProductData {
+      productName: string;
+      averageWeight: number;
+    }
 
-    const topProductsChartOptions = {
+    const topProducts = ref<ProductData[]>([]);
+    const chartSeries = ref<any[]>([]);
+
+    const websiteVisitorsChartOptions = {
       chart: {
         type: "bar",
         height: 385,
@@ -51,7 +47,7 @@ export default defineComponent({
       plotOptions: {
         bar: {
           borderRadius: 5,
-          horizontal: true,
+          horizontal: false,
           columnWidth: "28%",
           endingShape: "rounded",
         },
@@ -104,40 +100,51 @@ export default defineComponent({
       },
     };
 
-    const getTopProducts = async (): Promise<void> => {
+    const getTopProducts = async () => {
       try {
         const orders = Object.values(props.arrayData);
         const allOrders = orders[0];
         const allProducts = orders[1];
 
-        const productMap: { [key: string]: string } = {};
+        const productMap: Record<string, string> = {};
         allProducts.forEach((product) => {
           productMap[product.objectID] = product.product_name;
         });
 
-        const productQuantityMap: { [key: string]: number } = {};
+        const productWeightMap: Record<string, number[]> = {};
+
         allOrders.forEach((order) => {
           const productId = order.product_id;
-          const quantity = parseInt(order.quantity);
+          const weight = parseInt(order.product_weight_g);
+
           if (productId.trim() !== "") {
-            if (Object.prototype.hasOwnProperty.call(productQuantityMap, productId)) {
-              productQuantityMap[productId] += quantity;
+            if (Object.prototype.hasOwnProperty.call(productWeightMap, productId)) {
+              productWeightMap[productId].push(weight);
             } else {
-              productQuantityMap[productId] = quantity;
+              productWeightMap[productId] = [weight];
             }
           }
         });
 
-        const products: Product[] = Object.keys(productQuantityMap).map((productId) => ({
-          quantity: productQuantityMap[productId],
+        const products: ProductData[] = Object.keys(productWeightMap).map((productId) => ({
           productName: productMap[productId] || "Nombre no encontrado",
+          averageWeight: productWeightMap[productId].reduce((acc, curr) => acc + curr, 0) / productWeightMap[productId].length,
         }));
 
-        products.sort((a, b) => b.quantity - a.quantity);
-        const top10ProductsData = products.slice(0, 10);
+        products.sort((a, b) => b.averageWeight - a.averageWeight);
 
-        top10Products.value = top10ProductsData;
-        topProductsChartOptions.xaxis.categories = top10ProductsData.map((product) => product.productName);
+        const top10Products = products.slice(0, 10);
+
+        topProducts.value = top10Products;
+        websiteVisitorsChartOptions.xaxis.categories = top10Products.map(
+          (product) => product.productName
+        );
+
+        chartSeries.value = [{
+          name: 'Peso promedio',
+          data: top10Products.map((product) => product.averageWeight.toFixed(2)),
+        }];
+
       } catch (error) {
         console.error("Error al obtener los productos:", error);
       }
@@ -148,8 +155,9 @@ export default defineComponent({
     });
 
     return {
-      top10Products,
-      topProductsChartOptions,
+      topProducts,
+      websiteVisitorsChartOptions,
+      chartSeries,
     };
   },
 });
