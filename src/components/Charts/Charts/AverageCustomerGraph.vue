@@ -25,7 +25,6 @@
 </template>
 <script lang="ts">
 import { defineComponent, onMounted, ref } from "vue";
-import VueApexCharts from "vue3-apexcharts";
 
 export default defineComponent({
   name: "AverageProductRatingsChart",
@@ -36,15 +35,11 @@ export default defineComponent({
       default: () => ({}),
     },
   },
-  components: {
-    apexchart: VueApexCharts,
-  },
   setup: (props) => {
     interface ProductRating {
       productName: string;
       averageRating: number;
     }
-
     const top5Ratings = ref<ProductRating[]>([]);
 
     const averageProductRatingsChartOptions = {

@@ -27,10 +27,19 @@
     <div class="col-lg-6">
       <CustomerCity v-if="res" :arrayData="res" />
     </div>
-
+    
+    <div class="col-lg-6">
+      <ReturnOrder v-if="res" :arrayData="res" />
+    </div>
+    
     <div class="col-lg-6">
       <CustomerWeight v-if="res" :arrayData="res" />
     </div>
+
+    <div class="col-lg-12">
+      <WeeklySales v-if="res" :arrayData="res" />
+    </div>
+
   </div>
 </template>
 
@@ -45,6 +54,10 @@ import AverageCustomerGraph from "../../components/Charts/Charts/AverageCustomer
 import TopClient from "../../components/Charts/Charts/TopClient.vue";
 import DataInformation from "@/controller/DataInformation";
 import CustomerWeight from "../../components/Charts/Charts/CustomerWeight.vue";
+import WeeklySales from "../../components/Charts/Charts/WeeklySales.vue";
+
+import ReturnOrder from "../../components/Charts/Charts/ReturnOrder.vue";
+
 
 export default defineComponent({
   name: "ChartsPage",
@@ -56,7 +69,9 @@ export default defineComponent({
     AverageCustomerGraph,
     TopClient,
     CustomerCity,
-    CustomerWeight
+    CustomerWeight,
+    WeeklySales,
+    ReturnOrder
   },
   setup: () => {
     const res = ref<any>(null);
