@@ -4,16 +4,18 @@
       <div
         class="mb-lg-15 d-sm-flex align-items-center justify-content-between"
       >
-        <h6 class="card-title fw-bold mb-0"> Categoría de producto más popular</h6>
+        <h6 class="card-title fw-bold mb-0">
+          Calificación promedio de los productos comprados
+        </h6>
       </div>
-      <div id="websiteVisitorsChart" class="chart">
+      <div id="averageProductRatingsChart" class="chart">
         <apexchart
           type="bar"
-          :options="websiteVisitorsChartOptions"
+          :options="averageProductRatingsChartOptions"
           :series="[
             {
-              name: 'Cantidad',
-              data: topProducts.map((product) => product.quantity),
+              name: 'Calificación Promedio',
+              data: top5Ratings.map((product) => product.averageRating),
             },
           ]"
         ></apexchart>
@@ -21,13 +23,12 @@
     </div>
   </div>
 </template>
-
 <script lang="ts">
 import { defineComponent, onMounted, ref } from "vue";
 import VueApexCharts from "vue3-apexcharts";
 
 export default defineComponent({
-  name: "WebsiteVisitors",
+  name: "AverageProductRatingsChart",
   props: {
     arrayData: {
       type: Object,
@@ -40,13 +41,13 @@ export default defineComponent({
   },
   setup: (props) => {
     interface ProductRating {
-      category: string;
-      quantity: number;
+      productName: string;
+      averageRating: number;
     }
 
-    const topProducts = ref<ProductRating[]>([]);
+    const top5Ratings = ref<ProductRating[]>([]);
 
-    const websiteVisitorsChartOptions = {
+    const averageProductRatingsChartOptions = {
       chart: {
         type: "bar",
         height: 385,
@@ -110,7 +111,7 @@ export default defineComponent({
       },
     };
 
-    const getTopCategory = async () => {
+    const getAverageProductRatings = async (): Promise<void> => {
       try {
         const orders = Object.values(props.arrayData);
         const allOrders = orders[0];
@@ -121,54 +122,55 @@ export default defineComponent({
           productMap[product.objectID] = product.product_name;
         });
 
-        const productQuantityMap = {};
-        const productCategoryMap = {};
+        const productRatings: {
+          [key: string]: { total: number; count: number };
+        } = {};
 
         allOrders.forEach((order) => {
           const productId = order.product_id;
-          const quantity = parseInt(order.quantity);
-          const category = order.product_category;
+          const rating = parseFloat(order.rating);
 
-          if (productId.trim() !== "") {
-            if (
-              Object.prototype.hasOwnProperty.call(
-                productQuantityMap,
-                productId
-              )
-            ) {
-              productQuantityMap[productId] += quantity;
-            } else {
-              productQuantityMap[productId] = quantity;
-              productCategoryMap[productId] = category;
+          if (!isNaN(rating)) {
+            if (productId.trim() !== "") {
+              if (
+                Object.prototype.hasOwnProperty.call(productRatings, productId)
+              ) {
+                productRatings[productId].total += rating;
+                productRatings[productId].count++;
+              } else {
+                productRatings[productId] = { total: rating, count: 1 };
+              }
             }
           }
         });
 
-        const products = Object.keys(productQuantityMap).map((productId) => ({
-          category: productCategoryMap[productId],
-          quantity: productQuantityMap[productId],
-        }));
-
-        products.sort((a, b) => b.quantity - a.quantity);
-
-        const top10Products = products.slice(0, 10);
-
-        topProducts.value = top10Products;
-        websiteVisitorsChartOptions.xaxis.categories = top10Products.map(
-          (product) => product.category
+        const averageRatings: ProductRating[] = Object.keys(productRatings).map(
+          (productId) => ({
+            productName: productMap[productId] || "Nombre no encontrado",
+            averageRating:
+              productRatings[productId].total / productRatings[productId].count,
+          })
         );
+
+        averageRatings.sort((a, b) => b.averageRating - a.averageRating);
+
+        const top5RatingsData = averageRatings.slice(0, 5);
+
+        top5Ratings.value = top5RatingsData;
+        averageProductRatingsChartOptions.xaxis.categories =
+          top5RatingsData.map((product) => product.productName);
       } catch (error) {
-        console.error("Error al obtener los productos:", error);
+        console.error("Error al obtener las calificaciones promedio:", error);
       }
     };
 
     onMounted(async () => {
-      await getTopCategory();
+      await getAverageProductRatings();
     });
 
     return {
-      topProducts,
-      websiteVisitorsChartOptions,
+      top5Ratings,
+      averageProductRatingsChartOptions,
     };
   },
 });

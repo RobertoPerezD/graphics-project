@@ -1,8 +1,25 @@
 <template>
   <div class="row">
     <div class="col-lg-6">
-      <BestSellingProduct />
+      <BestSellingProduct v-if="res" :arrayData="res" />
     </div>
+    <div class="col-lg-6">
+      <WebsiteVisitors v-if="res" :arrayData="res" />
+    </div>
+    
+    <div class="col-lg-6">
+      <TopClient v-if="res" :arrayData="res" />
+    </div>
+
+    <div class="col-lg-6">
+      <ClientGraph v-if="res" :arrayData="res" />
+    </div>
+
+
+    <div class="col-lg-6">
+      <AverageCustomerGraph v-if="res" :arrayData="res" />
+    </div>
+
     <div class="col-lg-12">
       <div
         class="card mb-25 border-0 rounded-0 bg-white sales-pos-location-box"
@@ -19,7 +36,7 @@
       <AverageEnrollmentRate />
     </div>
     <div class="col-lg-6">
-      <WebsiteVisitors />
+      <!-- <WebsiteVisitors /> -->
       <ProjectDistribution />
       <UnresolvedTickets />
       <PerformanceChart />
@@ -43,6 +60,9 @@ import ProjectDistribution from "../../components/Charts/Charts/ProjectDistribut
 import UnresolvedTickets from "../../components/Charts/Charts/UnresolvedTickets.vue";
 import PerformanceChart from "../../components/Charts/Charts/PerformanceChart.vue";
 import ClientPaymentStatus from "../../components/Charts/Charts/ClientPaymentStatus.vue";
+import ClientGraph from "../../components/Charts/Charts/ClientGraph.vue";
+import AverageCustomerGraph from "../../components/Charts/Charts/AverageCustomerGraph.vue";
+import TopClient from "../../components/Charts/Charts/TopClient.vue";
 import DataInformation from "@/controller/DataInformation";
 
 export default defineComponent({
@@ -61,15 +81,16 @@ export default defineComponent({
     UnresolvedTickets,
     PerformanceChart,
     ClientPaymentStatus,
+    ClientGraph,
+    AverageCustomerGraph,
+    TopClient,
   },
   setup: () => {
     const res = ref<any>(null);
+
     onMounted(async () => {
       res.value = await new DataInformation().convertInformationJSON();
-      console.log(res.value)
     });
-
-    console.log(res.value)
 
     return { res };
   },

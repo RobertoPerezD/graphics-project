@@ -45,12 +45,16 @@
           </ul>
         </div>
       </div>
-      <div id="averageEnrollmentRateChart" class="chart">
+      <div id="topProductsChart" class="chart">
         <apexchart
           type="bar"
-          height="265"
-          :options="chartOptions"
-          :series="chartData"
+          :options="topProductsChartOptions"
+          :series="[
+            {
+              name: 'Cantidad de compras',
+              data: top10Products.map((product) => product.quantity),
+            },
+          ]"
         ></apexchart>
       </div>
     </div>
@@ -59,82 +63,68 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref } from "vue";
+import VueApexCharts from "vue3-apexcharts";
+
+interface Product {
+  quantity: number;
+  productName: string;
+}
+
 export default defineComponent({
-  name: "AverageEnrollmentRate",
-  setup: () => {
-    const data = ref({});
-    const topProducts = ref([]);
-    const loading = ref(false);
+  name: "BestSellingProductChart",
+  props: {
+    arrayData: {
+      type: Object,
+      required: true,
+      default: () => ({}),
+    },
+  },
+  components: {
+    apexchart: VueApexCharts,
+  },
+  setup: (props) => {
+    const top10Products = ref<Product[]>([]);
 
-    const chartData = ref([
-      {
-        name: "On Sale Course",
-        data: [80, 110, 50, 100, 70],
-      },
-      {
-        name: "Regular Paid Course",
-        data: [60, 90, 20, 60, 40],
-      },
-    ]);
-
-    const chartOptions = ref({
+    const topProductsChartOptions = {
       chart: {
-        height: 400,
         type: "bar",
-        horizontal: true,
-        zoom: {
-          enabled: false,
-        },
+        height: 385,
         toolbar: {
           show: false,
         },
       },
       plotOptions: {
         bar: {
-          horizontal: true,
+          borderRadius: 5,
+          horizontal: true, // Make the chart horizontal
+          columnWidth: "28%",
+          endingShape: "rounded",
         },
       },
       dataLabels: {
         enabled: false,
       },
+      colors: ["#6560F0"],
       stroke: {
-        curve: "smooth",
+        show: false,
       },
-      colors: ["#6560F0", "#6FD3F7"],
-      legend: {
-        show: true,
-        offsetY: 15,
-        position: "top",
-        fontWeight: 500,
-        fontSize: "14px",
-        horizontalAlign: "right",
-        fontFamily: "Red Hat Display, sans-serif",
+      xaxis: {
+        categories: [] as string[],
         labels: {
-          colors: "#8E8DA1",
-        },
-        markers: {
-          offsetX: -4,
-          height: 12,
-          width: 12,
-        },
-        itemMargin: {
-          horizontal: 10,
-        },
-      },
-      grid: {
-        show: true,
-        strokeDashArray: 5,
-        borderColor: "#d9e9ef",
-      },
-      tooltip: {
-        style: {
-          fontSize: "14px",
-          fontFamily: "Red Hat Display, sans-serif",
+          show: true,
+          style: {
+            fontFamily: "Red Hat Display, sans-serif",
+            colors: "#9C9AB6",
+            fontSize: "14px",
+            fontWeight: 500,
+          },
         },
       },
       yaxis: {
-        categories: ["Launch", "Week_01", "Week_02", "Week_03", "Week_04"],
+        show: true,
+        tickAmount: 8,
         labels: {
+          show: true,
           style: {
             fontFamily: "Red Hat Display, sans-serif",
             colors: ["#9C9AB6"],
@@ -142,26 +132,69 @@ export default defineComponent({
             fontWeight: 500,
           },
         },
-        axisTicks: {
-          show: false,
-        },
-        axisBorder: {
-          show: false,
-        },
-        tooltip: {
-          style: {
-            fontFamily: "Red Hat Display, sans-serif",
-            colors: "#2b2a3f",
-            fontSize: "14px",
-          },
+      },
+      fill: {
+        opacity: 1,
+      },
+      tooltip: {
+        style: {
+          fontSize: "14px",
+          fontFamily: "Red Hat Display, sans-serif",
         },
       },
+      grid: {
+        show: true,
+        strokeDashArray: 5,
+        borderColor: "#d9e9ef",
+      },
+    };
+
+    const getTopProducts = async (): Promise<void> => {
+      try {
+        const orders = Object.values(props.arrayData);
+        const allOrders = orders[0];
+        const allProducts = orders[1];
+
+        const productMap: { [key: string]: string } = {};
+        allProducts.forEach((product) => {
+          productMap[product.objectID] = product.product_name;
+        });
+
+        const productQuantityMap: { [key: string]: number } = {};
+        allOrders.forEach((order) => {
+          const productId = order.product_id;
+          const quantity = parseInt(order.quantity);
+          if (productId.trim() !== "") {
+            if (Object.prototype.hasOwnProperty.call(productQuantityMap, productId)) {
+              productQuantityMap[productId] += quantity;
+            } else {
+              productQuantityMap[productId] = quantity;
+            }
+          }
+        });
+
+        const products: Product[] = Object.keys(productQuantityMap).map((productId) => ({
+          quantity: productQuantityMap[productId],
+          productName: productMap[productId] || "Nombre no encontrado",
+        }));
+
+        products.sort((a, b) => b.quantity - a.quantity);
+        const top10ProductsData = products.slice(0, 10);
+
+        top10Products.value = top10ProductsData;
+        topProductsChartOptions.xaxis.categories = top10ProductsData.map((product) => product.productName);
+      } catch (error) {
+        console.error("Error al obtener los productos:", error);
+      }
+    };
+
+    onMounted(async () => {
+      await getTopProducts();
     });
 
-
     return {
-      chartData,
-      chartOptions,
+      top10Products,
+      topProductsChartOptions,
     };
   },
 });

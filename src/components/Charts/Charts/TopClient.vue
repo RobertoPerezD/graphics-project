@@ -4,16 +4,18 @@
       <div
         class="mb-lg-15 d-sm-flex align-items-center justify-content-between"
       >
-        <h6 class="card-title fw-bold mb-0"> Categoría de producto más popular</h6>
+        <h6 class="card-title fw-bold mb-0">
+            Cliente que ha realizado más compras
+        </h6>
       </div>
-      <div id="websiteVisitorsChart" class="chart">
+      <div id="topClientsChart" class="chart">
         <apexchart
           type="bar"
-          :options="websiteVisitorsChartOptions"
+          :options="topClientsChartOptions"
           :series="[
             {
-              name: 'Cantidad',
-              data: topProducts.map((product) => product.quantity),
+              name: 'Cantidad de compras',
+              data: top5Clients.map((client) => client.totalPurchase),
             },
           ]"
         ></apexchart>
@@ -21,13 +23,12 @@
     </div>
   </div>
 </template>
-
 <script lang="ts">
 import { defineComponent, onMounted, ref } from "vue";
 import VueApexCharts from "vue3-apexcharts";
 
 export default defineComponent({
-  name: "WebsiteVisitors",
+  name: "TopClientsChart",
   props: {
     arrayData: {
       type: Object,
@@ -39,14 +40,14 @@ export default defineComponent({
     apexchart: VueApexCharts,
   },
   setup: (props) => {
-    interface ProductRating {
-      category: string;
-      quantity: number;
+    interface TopClient {
+      clientId: string;
+      totalPurchase: number;
     }
 
-    const topProducts = ref<ProductRating[]>([]);
+    const top5Clients = ref<TopClient[]>([]);
 
-    const websiteVisitorsChartOptions = {
+    const topClientsChartOptions = {
       chart: {
         type: "bar",
         height: 385,
@@ -57,8 +58,8 @@ export default defineComponent({
       plotOptions: {
         bar: {
           borderRadius: 5,
-          horizontal: false,
-          columnWidth: "28%",
+          horizontal: true, // Hacer que el gráfico sea horizontal
+          columnWidth: "50%", // Ajustar el ancho de la barra
           endingShape: "rounded",
         },
       },
@@ -110,65 +111,53 @@ export default defineComponent({
       },
     };
 
-    const getTopCategory = async () => {
+    const getTopClients = async (): Promise<void> => {
       try {
         const orders = Object.values(props.arrayData);
         const allOrders = orders[0];
-        const allProducts = orders[1];
 
-        const productMap = {};
-        allProducts.forEach((product) => {
-          productMap[product.objectID] = product.product_name;
-        });
-
-        const productQuantityMap = {};
-        const productCategoryMap = {};
+        const clientPurchaseMap = {};
 
         allOrders.forEach((order) => {
-          const productId = order.product_id;
-          const quantity = parseInt(order.quantity);
-          const category = order.product_category;
+          const clientId = order.customer_id;
+          const totalPurchase = parseFloat(order.payment.replace(",", "."));
 
-          if (productId.trim() !== "") {
+          if (clientId.trim() !== "" && !isNaN(totalPurchase)) {
             if (
-              Object.prototype.hasOwnProperty.call(
-                productQuantityMap,
-                productId
-              )
+              Object.prototype.hasOwnProperty.call(clientPurchaseMap, clientId)
             ) {
-              productQuantityMap[productId] += quantity;
+              clientPurchaseMap[clientId] += totalPurchase;
             } else {
-              productQuantityMap[productId] = quantity;
-              productCategoryMap[productId] = category;
+              clientPurchaseMap[clientId] = totalPurchase;
             }
           }
         });
 
-        const products = Object.keys(productQuantityMap).map((productId) => ({
-          category: productCategoryMap[productId],
-          quantity: productQuantityMap[productId],
+        const clients = Object.keys(clientPurchaseMap).map((clientId) => ({
+          clientId: clientId,
+          totalPurchase: clientPurchaseMap[clientId],
         }));
 
-        products.sort((a, b) => b.quantity - a.quantity);
+        clients.sort((a, b) => b.totalPurchase - a.totalPurchase);
 
-        const top10Products = products.slice(0, 10);
+        const top5ClientsData = clients.slice(0, 5);
 
-        topProducts.value = top10Products;
-        websiteVisitorsChartOptions.xaxis.categories = top10Products.map(
-          (product) => product.category
+        top5Clients.value = top5ClientsData;
+        topClientsChartOptions.xaxis.categories = top5ClientsData.map(
+          (client) => client.clientId
         );
       } catch (error) {
-        console.error("Error al obtener los productos:", error);
+        console.error("Error al obtener los clientes:", error);
       }
     };
 
     onMounted(async () => {
-      await getTopCategory();
+      await getTopClients();
     });
 
     return {
-      topProducts,
-      websiteVisitorsChartOptions,
+      top5Clients,
+      topClientsChartOptions,
     };
   },
 });
